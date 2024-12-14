@@ -9,7 +9,7 @@ import (
 
 type Cache interface {
 	Close() error
-	Exists(hash string) (bool, error)
+	Exist(hash string) (bool, error)
 	Set(hash string) error
 }
 
@@ -38,7 +38,7 @@ func (c *cache) Close() error {
 	return c.client.Close()
 }
 
-func (c *cache) Exists(hash string) (bool, error) {
+func (c *cache) Exist(hash string) (bool, error) {
 	_, err := c.client.Get(
 		context.Background(),
 		hash,
@@ -49,8 +49,7 @@ func (c *cache) Exists(hash string) (bool, error) {
 		}
 		return false, err
 	}
-
-	return false, nil
+	return true, nil
 }
 
 func (c *cache) Set(hash string) error {

@@ -2,20 +2,20 @@ version: "3.9"
 
 services:
   db:
-    image: arm64v8/postgres:16.4
+    build:
+      context: ./database
     environment:
       POSTGRES_PASSWORD: ${PASS}
       POSTGRES_USER: "postgres"
       POSTGRES_DB: "postgres"
       POSTGRES_PORT: "5432"
-      PGDATA: "/var/lib/postgresql/data/pgdata"
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 30s
       timeout: 10s
       retries: 5
     volumes:
-      - database:/var/lib/postgresql/data/pgdata
+      - database:/var/lib/postgresql/data
 
   cache:
     image: arm64v8/redis:7.4.1
@@ -36,9 +36,8 @@ services:
 
   app:
     build:
-      context: ./
+      context: ./crawler
     environment:
-      BUCKET_PATH: "./data"
       DB_HOST: "db"
       DB_PORT: "5432"
       DB_NAME: "postgres"
@@ -47,10 +46,31 @@ services:
       CACHE_HOST: "cache"
       CACHE_PORT: "6379"
       CACHE_PASS: ${PASS}
+      BUCKET_PATH: "./data"
       QUEUE_HOST: "queue"
       QUEUE_PORT: "5672"
-      QUEUE_NAME: "url"
+      URL_QUEUE_NAME: "url"
+      IMG_QUEUE_NAME: "img"
       START: ${START}
+    depends_on:
+      db:
+        condition: "service_healthy"
+    volumes:
+      - bucket:/data
+
+  clip:
+    build:
+      context: ./clip
+    environment:
+      BUCKET_PATH: "./data"
+      DB_HOST: "db"
+      DB_PORT: "5432"
+      DB_NAME: "postgres"
+      DB_USER: "postgres"
+      DB_PASS: ${PASS}
+      QUEUE_HOST: "queue"
+      QUEUE_PORT: "5672"
+      QUEUE_NAME: "img"
     depends_on:
       db:
         condition: "service_healthy"

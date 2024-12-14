@@ -1,4 +1,4 @@
-module github.com/kfc-manager/vision-seeker
+module github.com/kfc-manager/vision-seeker/crawler
 
 go 1.22.5
 

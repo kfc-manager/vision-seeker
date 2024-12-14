@@ -3,10 +3,10 @@ package crawler
 import (
 	gourl "net/url"
 
-	"github.com/kfc-manager/vision-seeker/adapter/client"
-	"github.com/kfc-manager/vision-seeker/domain/html"
-	"github.com/kfc-manager/vision-seeker/domain/image"
-	"github.com/kfc-manager/vision-seeker/service/data"
+	"github.com/kfc-manager/vision-seeker/crawler/adapter/client"
+	"github.com/kfc-manager/vision-seeker/crawler/domain/html"
+	"github.com/kfc-manager/vision-seeker/crawler/domain/image"
+	"github.com/kfc-manager/vision-seeker/crawler/service/data"
 )
 
 type Service interface {
@@ -23,31 +23,26 @@ func New(c client.Client, d data.Service) *service {
 }
 
 func (s *service) Crawl() {
-	loc, err := s.data.Url()
+	url, alt, err := s.data.Next()
 	if err != nil {
 		return
 	}
 	defer s.Crawl()
 
-	res, err := s.client.Get(loc)
+	res, err := s.client.Get(url.String())
 	if err != nil {
 		return
 	}
 
 	if res.Type == client.Image {
-		img, err := image.LoadImage(res.Body)
+		img, err := image.Load(res.Body)
 		if err != nil {
 			return
 		}
-		if !img.Valid(500, 500, 6.0, false) {
+		if !img.Valid(300, 300, 3.0, false) {
 			return
 		}
-		_ = s.data.StoreImage(img)
-	}
-
-	url, err := gourl.Parse(loc)
-	if err != nil {
-		return
+		_ = s.data.StoreImage(img, alt)
 	}
 
 	if res.Type == client.Html {
@@ -56,22 +51,22 @@ func (s *service) Crawl() {
 			return
 		}
 
-		for _, i := range doc.Images() {
-			src := i.Attribute("src")
+		for _, img := range doc.Images() {
+			src := img.Attribute("src")
 			if len(src) < 1 {
 				continue
 			}
-			img, err := gourl.Parse(src)
+			imgUrl, err := gourl.Parse(src)
 			if err != nil {
 				continue
 			}
-			if len(img.Scheme) < 1 {
-				img.Scheme = url.Scheme
+			if len(imgUrl.Scheme) < 1 {
+				imgUrl.Scheme = url.Scheme
 			}
-			if len(img.Host) < 1 {
-				img.Host = url.Host
+			if len(imgUrl.Host) < 1 {
+				imgUrl.Host = url.Host
 			}
-			_ = s.data.SetUrl(img)
+			_ = s.data.Visit(imgUrl, img.Attribute("alt"))
 		}
 
 		for _, l := range doc.Links() {
@@ -85,7 +80,7 @@ func (s *service) Crawl() {
 			if len(link.Host) < 1 {
 				link.Host = url.Host
 			}
-			_ = s.data.SetUrl(link)
+			_ = s.data.Visit(link, "")
 		}
 	}
 

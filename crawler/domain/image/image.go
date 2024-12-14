@@ -9,46 +9,39 @@ import (
 	_ "image/png"
 	"math"
 
-	"github.com/kfc-manager/vision-seeker/domain"
 	_ "golang.org/x/image/bmp"
 	_ "golang.org/x/image/tiff"
 	_ "golang.org/x/image/webp"
 )
 
 type Image struct {
-	Width  int
-	Height int
-	format string
-	Raw    []byte
-	img    image.Image
+	Size    int
+	Width   int
+	Height  int
+	entropy *float64
+	Format  string
+	Data    []byte
+	img     image.Image
 }
 
-func LoadImage(b []byte) (*Image, error) {
+func Load(b []byte) (*Image, error) {
 	img, form, err := image.Decode(bytes.NewReader(b))
 	if err != nil {
 		return nil, err
 	}
 
 	return &Image{
+		Size:   len(b),
 		Width:  img.Bounds().Dx(),
 		Height: img.Bounds().Dy(),
-		format: form,
-		Raw:    b,
+		Format: form,
+		Data:   b,
 		img:    img,
 	}, nil
 }
 
-func (img *Image) Hash() (string, error) {
-	h, err := domain.Sha256(img.Raw)
-	if err != nil {
-		return "", err
-	}
-
-	return h, nil
-}
-
 func (img *Image) trans() bool {
-	if img.format == "jpeg" {
+	if img.Format == "jpeg" {
 		return false
 	}
 
@@ -64,7 +57,11 @@ func (img *Image) trans() bool {
 	return false
 }
 
-func (img *Image) entropy() float64 {
+func (img *Image) Entropy() float64 {
+	if img.entropy != nil {
+		return *img.entropy
+	}
+
 	hist := make([]int, 256)
 	total := 0
 
@@ -84,6 +81,7 @@ func (img *Image) entropy() float64 {
 		}
 	}
 
+	img.entropy = &entropy
 	return entropy
 }
 
@@ -98,7 +96,7 @@ func (img *Image) Valid(width, height int, entropy float64, trans bool) bool {
 		}
 	}
 
-	if img.entropy() < entropy {
+	if img.Entropy() < entropy {
 		return false
 	}
 
