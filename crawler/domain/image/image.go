@@ -41,6 +41,7 @@ func Load(b []byte) (*Image, error) {
 }
 
 func (img *Image) trans() bool {
+	// relies on the fact that jpeg don't support transparency
 	if img.Format == "jpeg" {
 		return false
 	}
@@ -48,7 +49,7 @@ func (img *Image) trans() bool {
 	for x := img.img.Bounds().Min.X; x < img.img.Bounds().Max.X; x++ {
 		for y := img.img.Bounds().Min.Y; y < img.img.Bounds().Max.Y; y++ {
 			_, _, _, alpha := img.img.At(x, y).RGBA()
-			if alpha != 0 {
+			if alpha < 0xffff {
 				return true
 			}
 		}
