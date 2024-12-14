@@ -35,7 +35,7 @@ func TestTrans(t *testing.T) {
 		},
 		{
 			"jpeg",
-			"../../test/dog.jpg",
+			"../../test/jpeg.jpeg",
 			false,
 		},
 	}
