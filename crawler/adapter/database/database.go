@@ -13,6 +13,7 @@ import (
 type Database interface {
 	Close()
 	InsertUrl(hash string) (bool, error)
+	ExistUrl(hash string) (bool, error)
 	InsertImage(hash string, img *image.Image) (bool, error)
 	InsertLabel(hash, label string) (bool, error)
 	InsertMapping(imgHash, lblHash string) (bool, error)
@@ -27,6 +28,10 @@ func New(host, port, name, user, pass string) (*database, error) {
 		context.Background(),
 		fmt.Sprintf("postgres://%s:%s@%s:%s/%s", user, pass, host, port, name),
 	)
+	if err != nil {
+		return nil, err
+	}
+	err = conn.Ping(context.Background())
 	if err != nil {
 		return nil, err
 	}
@@ -58,6 +63,23 @@ func (db *database) InsertUrl(hash string) (bool, error) {
 		hash,
 	)
 	return insertResult(err)
+}
+
+func (db *database) ExistUrl(hash string) (bool, error) {
+	row := db.conn.QueryRow(
+		context.Background(),
+		`SELECT EXISTS (
+			SELECT 1 FROM visited where hash = $1
+		);`,
+		hash,
+	)
+
+	exist := false
+	if err := row.Scan(&exist); err != nil {
+		return false, err
+	}
+
+	return exist, nil
 }
 
 func (db *database) InsertImage(hash string, img *image.Image) (bool, error) {
