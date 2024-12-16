@@ -19,26 +19,23 @@ type Service interface {
 }
 
 type service struct {
-	db       database.Database
-	cache    cache.Cache
-	bucket   bucket.Bucket
-	urlQueue queue.Queue
-	imgQueue queue.Queue
+	db     database.Database
+	cache  cache.Cache
+	bucket bucket.Bucket
+	queue  queue.Queue
 }
 
 func New(
 	db database.Database,
 	c cache.Cache,
 	b bucket.Bucket,
-	url queue.Queue,
-	img queue.Queue,
+	q queue.Queue,
 ) *service {
 	return &service{
-		db:       db,
-		cache:    c,
-		bucket:   b,
-		urlQueue: url,
-		imgQueue: img,
+		db:     db,
+		cache:  c,
+		bucket: b,
+		queue:  q,
 	}
 }
 
@@ -56,7 +53,6 @@ func (s *service) StoreImage(img *image.Image, label string) error {
 		if err != nil {
 			return err
 		}
-		s.imgQueue.Push([]byte(imgHash))
 	}
 
 	lblHash, err := domain.Sha256([]byte(label))
@@ -107,11 +103,11 @@ func (s *service) Visit(url *gourl.URL, alt string) error {
 		return err
 	}
 
-	return s.urlQueue.Push(b)
+	return s.queue.Push(b)
 }
 
 func (s *service) Next() (*gourl.URL, string, error) {
-	b, err := s.urlQueue.Pull()
+	b, err := s.queue.Pull()
 	if err != nil {
 		return nil, "", err
 	}

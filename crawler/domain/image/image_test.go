@@ -20,6 +20,15 @@ func TestLoad(t *testing.T) {
 		want  *Image
 	}{
 		{
+			"jpeg",
+			"../../test/non-trans.jpeg",
+			&Image{
+				Width:  16,
+				Height: 12,
+				Format: "jpeg",
+			},
+		},
+		{
 			"transparent png",
 			"../../test/trans.png",
 			&Image{
@@ -32,18 +41,18 @@ func TestLoad(t *testing.T) {
 			"non transparent png",
 			"../../test/non-trans.png",
 			&Image{
-				Width:  137,
-				Height: 91,
+				Width:  16,
+				Height: 12,
 				Format: "png",
 			},
 		},
 		{
-			"jpeg",
-			"../../test/jpeg.jpeg",
+			"transparent webp",
+			"../../test/trans.webp",
 			&Image{
-				Width:  241,
-				Height: 180,
-				Format: "jpeg",
+				Width:  16,
+				Height: 16,
+				Format: "webp",
 			},
 		},
 		{
@@ -56,11 +65,20 @@ func TestLoad(t *testing.T) {
 			},
 		},
 		{
-			"transparent webp",
-			"../../test/trans.webp",
+			"transparent avif",
+			"../../test/trans.avif",
 			&Image{
 				Width:  16,
 				Height: 16,
+				Format: "webp",
+			},
+		},
+		{
+			"non transparent avif",
+			"../../test/non-trans.avif",
+			&Image{
+				Width:  16,
+				Height: 12,
 				Format: "webp",
 			},
 		},
@@ -100,6 +118,11 @@ func TestTrans(t *testing.T) {
 		want  bool
 	}{
 		{
+			"jpeg",
+			"../../test/non-trans.jpeg",
+			false,
+		},
+		{
 			"transparent png",
 			"../../test/trans.png",
 			true,
@@ -110,9 +133,9 @@ func TestTrans(t *testing.T) {
 			false,
 		},
 		{
-			"jpeg",
-			"../../test/jpeg.jpeg",
-			false,
+			"transparent webp",
+			"../../test/trans.webp",
+			true,
 		},
 		{
 			"non transparent webp",
@@ -120,9 +143,14 @@ func TestTrans(t *testing.T) {
 			false,
 		},
 		{
-			"transparent webp",
-			"../../test/trans.webp",
+			"transparent avif",
+			"../../test/trans.avif",
 			true,
+		},
+		{
+			"non transparent avif",
+			"../../test/non-trans.avif",
+			false,
 		},
 	}
 

@@ -49,28 +49,8 @@ services:
       BUCKET_PATH: "./data"
       QUEUE_HOST: "queue"
       QUEUE_PORT: "5672"
-      URL_QUEUE_NAME: "url"
-      IMG_QUEUE_NAME: "img"
+      QUEUE_NAME: "url"
       START: ${START}
-    depends_on:
-      db:
-        condition: "service_healthy"
-    volumes:
-      - bucket:/data
-
-  clip:
-    build:
-      context: ./clip
-    environment:
-      BUCKET_PATH: "./data"
-      DB_HOST: "db"
-      DB_PORT: "5432"
-      DB_NAME: "postgres"
-      DB_USER: "postgres"
-      DB_PASS: ${PASS}
-      QUEUE_HOST: "queue"
-      QUEUE_PORT: "5672"
-      QUEUE_NAME: "img"
     depends_on:
       db:
         condition: "service_healthy"

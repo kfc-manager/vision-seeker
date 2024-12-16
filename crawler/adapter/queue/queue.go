@@ -15,15 +15,14 @@ type Queue interface {
 }
 
 type queue struct {
-	conn        *amqp.Connection
-	name        string
-	prod        *amqp.Channel
-	cons        *amqp.Channel
-	msgs        <-chan amqp.Delivery
-	contentType string
+	conn *amqp.Connection
+	name string
+	prod *amqp.Channel
+	cons *amqp.Channel
+	msgs <-chan amqp.Delivery
 }
 
-func New(host, port, name string, text bool, maxSize int) (*queue, error) {
+func New(host, port, name string, maxSize int) (*queue, error) {
 	conn, err := amqp.Dial(fmt.Sprintf("amqp://guest:guest@%s:%s/", host, port))
 	if err != nil {
 		return nil, err
@@ -69,18 +68,12 @@ func New(host, port, name string, text bool, maxSize int) (*queue, error) {
 		return nil, err
 	}
 
-	ct := "text/plain"
-	if !text {
-		ct = "application/json"
-	}
-
 	return &queue{
-		conn:        conn,
-		prod:        prod,
-		cons:        cons,
-		msgs:        msgs,
-		name:        name,
-		contentType: ct,
+		conn: conn,
+		prod: prod,
+		cons: cons,
+		msgs: msgs,
+		name: name,
 	}, nil
 }
 
@@ -110,7 +103,7 @@ func (q *queue) Push(msg []byte) error {
 		false,  // mandatory
 		false,  // immediate
 		amqp.Publishing{
-			ContentType: q.contentType,
+			ContentType: "application/json",
 			Body:        msg,
 		})
 }

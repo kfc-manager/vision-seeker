@@ -43,29 +43,18 @@ func main() {
 		panic(err)
 	}
 
-	urlQue, err := queue.New(
+	que, err := queue.New(
 		envOrPanic("QUEUE_HOST"),
 		envOrPanic("QUEUE_PORT"),
 		envOrPanic("URL_QUEUE_NAME"),
-		false, // want to store json in that queue
-		1000000,
-	)
-	if err != nil {
-		panic(err)
-	}
-	imgQue, err := queue.New(
-		envOrPanic("QUEUE_HOST"),
-		envOrPanic("QUEUE_PORT"),
-		envOrPanic("IMG_QUEUE_NAME"),
-		true, // want to store image hashes in queue
-		0,
+		100000000,
 	)
 	if err != nil {
 		panic(err)
 	}
 
 	time.Sleep(5 * time.Second)
-	dataServ := data.New(db, cach, buck, urlQue, imgQue)
+	dataServ := data.New(db, cach, buck, que)
 	url, err := gourl.Parse(envOrPanic("START"))
 	if err != nil {
 		panic(err)
