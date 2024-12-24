@@ -23,7 +23,7 @@ services:
       [
         "redis-server",
         "--maxmemory",
-        "4gb",
+        "512mb",
         "--maxmemory-policy",
         "allkeys-lru",
       ]
@@ -34,9 +34,9 @@ services:
   queue:
     image: arm64v8/rabbitmq:4.0.4
 
-  app:
+  server:
     build:
-      context: ./crawler
+      context: ./server
     environment:
       DB_HOST: "db"
       DB_PORT: "5432"
@@ -49,8 +49,28 @@ services:
       BUCKET_PATH: "./data"
       QUEUE_HOST: "queue"
       QUEUE_PORT: "5672"
-      QUEUE_NAME: "url"
-      START: ${START}
+      QUEUE_NAME: "image"
+    ports:
+      - "8000:80"
+    depends_on:
+      db:
+        condition: "service_healthy"
+    volumes:
+      - bucket:/data
+
+  decoder:
+    build:
+      context: ./decoder
+    environment:
+      DB_HOST: "db"
+      DB_PORT: "5432"
+      DB_NAME: "postgres"
+      DB_USER: "postgres"
+      DB_PASS: ${PASS}
+      BUCKET_PATH: "./data"
+      QUEUE_HOST: "queue"
+      QUEUE_PORT: "5672"
+      QUEUE_NAME: "image"
     depends_on:
       db:
         condition: "service_healthy"
