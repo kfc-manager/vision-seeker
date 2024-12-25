@@ -1,26 +1,15 @@
-CREATE EXTENSION IF NOT EXISTS vector;
+CREATE EXTENSION vector;
 
-CREATE TABLE IF NOT EXISTS visited (
-  hash VARCHAR(64) PRIMARY KEY
-);
-
-CREATE TABLE IF NOT EXISTS image (
+CREATE TABLE image (
   hash VARCHAR(64) PRIMARY KEY,
   size INTEGER NOT NULL,
   format VARCHAR(10) NOT NULL,
   width INTEGER NOT NULL,
   height INTEGER NOT NULL,
   entropy DOUBLE PRECISION NOT NULL,
-  embedding VECTOR(768) DEFAULT NULL
-);
-
-CREATE TABLE IF NOT EXISTS label (
-  hash VARCHAR(64) PRIMARY KEY,
-  label TEXT NOT NULL 
-);
-
-CREATE TABLE IF NOT EXISTS image_label_mapping (
-  image_hash VARCHAR(64) REFERENCES image(hash),
-  label_hash VARCHAR(64) REFERENCES label(hash),
-  UNIQUE (image_hash, label_hash)
+  transparent BOOLEAN NOT NULL,
+  created_at TIMESTAMP NOT NULL,
+  label TEXT DEFAULT NULL,
+  dino_embedding VECTOR(1536) DEFAULT NULL,
+  clip_embedding VECTOR(768) DEFAULT NULL
 );
