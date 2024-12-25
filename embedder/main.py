@@ -17,7 +17,7 @@ db_conn = psycopg2.connect(
 )
 
 cursor = db_conn.cursor()
-cursor.execute("SELECT hash FROM image WHERE embedding IS NULL;")
+cursor.execute("SELECT hash FROM image WHERE clip_embedding IS NULL;")
 rows = cursor.fetchall()
 result = [row[0] for row in rows]
 cursor.close()
@@ -31,7 +31,7 @@ for hash in result:
             image_features = model.encode_image(image)
             cursor = db_conn.cursor()
             cursor.execute(
-                "UPDATE image SET embedding = %s WHERE hash = %s;",
+                "UPDATE image SET clip_embedding = %s WHERE hash = %s;",
                 (image_features.squeeze().tolist(), hash)
             )
             db_conn.commit()
