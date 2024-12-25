@@ -74,6 +74,9 @@ func (s *service) Crawl() {
 			if err != nil {
 				continue
 			}
+			if link.Host != "en.wikipedia.org" {
+				continue
+			}
 			if len(link.Scheme) < 1 {
 				link.Scheme = url.Scheme
 			}

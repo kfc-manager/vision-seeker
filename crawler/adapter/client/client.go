@@ -36,6 +36,7 @@ func New() *client {
 }
 
 func (c *client) Get(url string) (*response, error) {
+	time.Sleep(time.Millisecond * 500)
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		return nil, err
