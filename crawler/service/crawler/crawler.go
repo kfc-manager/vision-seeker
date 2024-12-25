@@ -39,9 +39,6 @@ func (s *service) Crawl() {
 		if err != nil {
 			return
 		}
-		if !img.Valid(300, 300, 3.0, false) {
-			return
-		}
 		_ = s.data.StoreImage(img, alt)
 	}
 

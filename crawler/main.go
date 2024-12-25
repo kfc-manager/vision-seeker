@@ -47,7 +47,7 @@ func main() {
 		envOrPanic("QUEUE_HOST"),
 		envOrPanic("QUEUE_PORT"),
 		envOrPanic("URL_QUEUE_NAME"),
-		100000000,
+		0,
 	)
 	if err != nil {
 		panic(err)
