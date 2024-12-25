@@ -46,7 +46,7 @@ func main() {
 	que, err := queue.New(
 		envOrPanic("QUEUE_HOST"),
 		envOrPanic("QUEUE_PORT"),
-		envOrPanic("URL_QUEUE_NAME"),
+		envOrPanic("QUEUE_NAME"),
 		0,
 	)
 	if err != nil {
